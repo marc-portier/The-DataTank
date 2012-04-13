@@ -86,6 +86,7 @@ class SHP extends ATabularData {
             $shp_data = $record->getShpData();
             if(isset($shp_data['parts'])) {
                 $this->columns["coords"] = "coords";
+                $this->columns["coords_distance"] = "coords_distance";
             }
             if(isset($shp_data['x'])) {
                 $this->columns["lat"] = "lat";
@@ -166,6 +167,9 @@ class SHP extends ATabularData {
                     if(isset($shp_data['parts'])) {
                         foreach ($shp_data['parts'] as $part) {
                             $coords = array();
+                            $dist = 0;
+                            $x0 = null;
+                            $y0 = null;
                             foreach ($part['points'] as $point) {
                                 $x = $point['x'];
                                 $y = $point['y'];
@@ -177,8 +181,12 @@ class SHP extends ATabularData {
                                 }
                                 //$rowobject->long = ;	
                                 $coords[] = $y.','.$x;
+                                $dist += SHP::getDistance($x0, $y0, $x, $y);
+                                $x0=$x; 
+                                $y0=$y;
                             }
                             $rowobject->coords = implode(';', $coords);
+                            $rowobject->coords_distance = $dist;
                         }
                     }
                     if(isset($shp_data['x'])) {
@@ -217,5 +225,22 @@ class SHP extends ATabularData {
             throw new CouldNotGetDataTDTException( $uri );
         }
     }	
+
+    // using the function found at http://www.codecodex.com/wiki/Calculate_distance_between_two_points_on_a_globe
+    public static function getDistance($latitude1, $longitude1, $latitude2, $longitude2) {  
+        if ($latitude1 == null || $longitude1 == null || $latitude2 == null || $longitude2 == null) {
+            return 0;
+        }
+        $earth_radius = 6371;  
+                  
+        $dLat = deg2rad($latitude2 - $latitude1);  
+        $dLon = deg2rad($longitude2 - $longitude1);  
+                                
+        $a = sin($dLat/2) * sin($dLat/2) + cos(deg2rad($latitude1)) * cos(deg2rad($latitude2)) * sin($dLon/2) * sin($dLon/2);  
+        $c = 2 * asin(sqrt($a));  
+        $d = $earth_radius * $c;  
+                                                  
+        return $d;  
+    }  
 }
 ?>
