@@ -181,7 +181,7 @@ class SHP extends ATabularData {
                                 }
                                 //$rowobject->long = ;	
                                 $coords[] = $y.','.$x;
-                                $dist += SHP::getDistance($x0, $y0, $x, $y);
+                                $dist += SHP::getDistance($y0, $x0, $y, $x);
                                 $x0=$x; 
                                 $y0=$y;
                             }
